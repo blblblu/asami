@@ -6,7 +6,7 @@ use std::io;
 use std::cmp::Ordering;
 use rand::Rng;
 
-fn foo() {
+/*fn foo() {
 
     let secret_number = rand::thread_rng().gen_range(1, 101);
 
@@ -23,13 +23,18 @@ fn foo() {
         Ordering::Greater => println!("too big"),
         Ordering::Less => println!("too small"),
     }
+}*/
+
+fn handleRequest(input: &str, output: &str) {
+    println!("foo");
+    println!("input: {}, output: {}", input, output);
 }
 
 fn main() {
 
     let matches = App::new("asami")
         //.version("1.0")
-        .author("Sebastian Schulz <contact@sesc.me>")
+        .author("Sebastian Schulz <mail@sesc.me>")
         .about("pixel sorter")
         .arg(Arg::with_name("input")
             .short("i")
@@ -54,7 +59,7 @@ fn main() {
     let input = matches.value_of("input").unwrap();
     let output = matches.value_of("output").unwrap();
 
-    println!("input: {}, output: {}", input, output);
+    handleRequest(input, output);
 
     // Vary the output based on how many times the user used the "verbose" flag
     // (i.e. 'myprog -v -v -v' or 'myprog -vvv' vs 'myprog -v'

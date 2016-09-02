@@ -2,7 +2,7 @@
 
 name = 'asami'
 version = '0.0.1'
-authors = [ 'Sebastian Schulz <contact@sesc.me>' ]
+authors = [ 'Sebastian Schulz <mail@sesc.me>' ]
 
 [dependencies]
 
