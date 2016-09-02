@@ -1,0 +1,10 @@
+[package]
+
+name = 'asami'
+version = '0.0.1'
+authors = [ 'Sebastian Schulz <contact@sesc.me>' ]
+
+[dependencies]
+
+rand = '0.3.0'
+clap = '2.11.0'
