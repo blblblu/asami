@@ -4,6 +4,7 @@ extern crate clap;
 extern crate image;
 
 use std::path::Path;
+use std::cmp::Ordering;
 use rand::Rng;
 use clap::{Arg, App};
 use image::{DynamicImage, GenericImage, Rgba, RgbaImage};
@@ -83,7 +84,11 @@ fn brute_sort(input: &DynamicImage, chunk_min_length: u32, chunk_max_length: u32
 }
 
 fn sum_sort(pixels: &mut Vec<Rgba<u8>>) {
-    pixels.sort_by(|a, b| (pixel_sum(*a)).cmp(&pixel_sum(*b)));
+    pixels.sort_by(|a, b| sum_compare(*a, *b))
+}
+
+fn sum_compare(a: Rgba<u8>, b: Rgba<u8>) -> Ordering {
+    pixel_sum(a).cmp(&pixel_sum(b))
 }
 
 fn pixel_sum(pixel: Rgba<u8>) -> u32 {
