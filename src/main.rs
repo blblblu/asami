@@ -26,26 +26,12 @@ fn main() {
             .help("path to output file")
             .takes_value(true)
             .required(true))
-        /*.arg(Arg::with_name("v")
-            .short("v")
-            .multiple(true)
-            .help("Sets the level of verbosity"))*/
         .get_matches();
 
     let input = matches.value_of("input").unwrap();
     let output = matches.value_of("output").unwrap();
 
     handle_request(input, output);
-
-    // Vary the output based on how many times the user used the "verbose" flag
-    // (i.e. 'myprog -v -v -v' or 'myprog -vvv' vs 'myprog -v'
-    // match matches.occurrences_of("v") {
-    // 0 => println!("No verbose info"),
-    // 1 => println!("Some verbose info"),
-    // 2 => println!("Tons of verbose info"),
-    // 3 | _ => println!("Don't be crazy"),
-    // }
-
 }
 
 fn handle_request(input: &str, output: &str) {
@@ -56,14 +42,14 @@ fn handle_request(input: &str, output: &str) {
     println!("dimensions {:?}", in_img.dimensions());
     println!("{:?}", in_img.color());
 
-    let ref mut out_img = RgbaImage::new(in_img.width(), in_img.height());
-
-    sort_them_pixels(in_img, out_img);
+    let out_img = sort_them_pixels(in_img);
 
     let _ = out_img.save(output).unwrap();
 }
 
-fn sort_them_pixels(input: &DynamicImage, output: &mut RgbaImage) {
+fn sort_them_pixels(input: &DynamicImage) -> RgbaImage {
+    let mut output = RgbaImage::new(input.width(), input.height());
+
     let mut x = 0;
     let mut y = 0;
 
@@ -71,7 +57,7 @@ fn sort_them_pixels(input: &DynamicImage, output: &mut RgbaImage) {
 
     for (_, _, pixel) in input.pixels() {
         tmp.push(pixel);
-        if tmp.len() > 10 {
+        if tmp.len() > 100 {
             tmp.sort_by(|a, b| (a[3]).cmp(&b[1]));
             while !tmp.is_empty() {
                 output.put_pixel(x, y, tmp.pop().unwrap());
@@ -80,4 +66,5 @@ fn sort_them_pixels(input: &DynamicImage, output: &mut RgbaImage) {
             }
         }
     }
+    output
 }
