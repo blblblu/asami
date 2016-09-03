@@ -9,11 +9,11 @@ use rand::Rng;
 use clap::{Arg, App};
 use image::{DynamicImage, GenericImage, Rgba, RgbaImage};
 
-arg_enum!{
-    enum Mode {
-        Brute
-    }
-}
+// arg_enum!{
+// enum Mode {
+// Brute
+// }
+// }
 
 fn main() {
     let matches = App::new("asami")
@@ -23,9 +23,9 @@ fn main() {
         .args_from_usage(
             "<INPUT> 'The input file to use'
              <OUTPUT> 'The output file to use'")
-        .arg(Arg::from_usage("-m --mode <MODE> 'The mode to use'")
+        /*.arg(Arg::from_usage("-m --mode <MODE> 'The mode to use'")
             .possible_values(&Mode::variants())
-            .default_value("Brute"))
+            .default_value("Brute"))*/
         .arg(Arg::from_usage("--min <MIN> 'The minimum chunk size to sort'")
             .default_value("32"))
         .arg(Arg::from_usage("--max <MAX> 'The maximum chunk size to sort'")
@@ -47,7 +47,9 @@ fn main() {
 
 fn handle_request(input: &str, output: &str, chunk_min_length: u32, chunk_max_length: u32) {
     println!("input: {}, output: {}", input, output);
-    println!("minimum chunk size: {}, maximum chunk size: {}", chunk_min_length, chunk_max_length);
+    println!("minimum chunk size: {}, maximum chunk size: {}",
+             chunk_min_length,
+             chunk_max_length);
 
     let ref in_img = image::open(&Path::new(input)).unwrap();
 
@@ -104,7 +106,7 @@ fn increase_coordinates(x: &mut u32, y: &mut u32, steps: u32, image: &RgbaImage)
     *x = (*x + steps) % image.width();
 }
 
-fn write_pixels_to_image(image: &mut RgbaImage, x: u32, y: u32, pixels: &mut Vec<Rgba<u8>>){
+fn write_pixels_to_image(image: &mut RgbaImage, x: u32, y: u32, pixels: &mut Vec<Rgba<u8>>) {
     let mut x = x;
     let mut y = y;
 
