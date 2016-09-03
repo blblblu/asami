@@ -71,7 +71,7 @@ fn brute_sort(input: &DynamicImage, chunk_min_length: u32, chunk_max_length: u32
     for (_, _, pixel) in input.pixels() {
         tmp.push(pixel);
         if tmp.len() == threshold as usize {
-            tmp.sort_by(|a, b| (a[3]).cmp(&b[1]));
+            tmp.sort_by(|a, b| (a[2]).cmp(&b[2]));
             write_pixels_to_image(&mut output, out_x, out_y, &mut tmp);
             increase_coordinates(&mut out_x, &mut out_y, threshold, &output);
             threshold = calculate_chunk_threshold(chunk_min_length, chunk_max_length);
