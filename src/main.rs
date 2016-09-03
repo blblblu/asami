@@ -38,9 +38,8 @@ fn main() {
     let min = value_t!(matches, "min", u32).expect("the minimum chunk size has to be a number");
     let max = value_t!(matches, "max", u32).expect("the maximum chunk size has to be a number");
 
-    let mode = matches.value_of("mode").unwrap();
-
-    println!("mode: {}", mode);
+    // let mode = matches.value_of("mode").unwrap();
+    // println!("mode: {}", mode);
 
     handle_request(input, output, min, max);
 }
