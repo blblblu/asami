@@ -69,15 +69,15 @@ fn sort_them_pixels(input: &DynamicImage, output: &mut RgbaImage) {
 
     let mut tmp = Vec::new();
 
-    for (_, _, pixel) in input.pixels() {
-        tmp.push(pixel);
-        if tmp.len() > 10 {
-            tmp.sort_by(|a, b| (a[3]).cmp(&b[1]));
-            while !tmp.is_empty() {
-                output.put_pixel(x, y, tmp.pop().unwrap());
-                y = y + (x + 1) / input.width();
-                x = (x + 1) % input.width();
-            }
-        }
-    }
+for (_, _, pixel) in input.pixels() {
+tmp.push(pixel);
+if tmp.len() > 10 {
+tmp.sort_by(|a, b| (a[3]).cmp(&b[1]));
+while !tmp.is_empty() {
+output.put_pixel(x, y, tmp.pop().unwrap());
+y = y + (x + 1) / input.width();
+x = (x + 1) % input.width();
+}
+}
+}
 }
