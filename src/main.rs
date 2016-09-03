@@ -1,10 +1,14 @@
-extern crate rand;
+//extern crate rand;
 extern crate clap;
-use clap::{Arg, App};
+extern crate image;
 
-use std::io;
-use std::cmp::Ordering;
-use rand::Rng;
+//use std::io;
+//use std::cmp::Ordering;
+//use std::fs::File;
+use std::path::Path;
+//use rand::Rng;
+use clap::{Arg, App};
+use image::{DynamicImage, GenericImage, RgbaImage};
 
 /*fn foo() {
 
@@ -25,13 +29,7 @@ use rand::Rng;
     }
 }*/
 
-fn handleRequest(input: &str, output: &str) {
-    println!("foo");
-    println!("input: {}, output: {}", input, output);
-}
-
 fn main() {
-
     let matches = App::new("asami")
         //.version("1.0")
         .author("Sebastian Schulz <mail@sesc.me>")
@@ -59,7 +57,7 @@ fn main() {
     let input = matches.value_of("input").unwrap();
     let output = matches.value_of("output").unwrap();
 
-    handleRequest(input, output);
+    handle_request(input, output);
 
     // Vary the output based on how many times the user used the "verbose" flag
     // (i.e. 'myprog -v -v -v' or 'myprog -vvv' vs 'myprog -v'
@@ -69,4 +67,29 @@ fn main() {
         2 => println!("Tons of verbose info"),
         3 | _ => println!("Don't be crazy"),
     }*/
+}
+
+fn handle_request(input: &str, output: &str) {
+    println!("input: {}, output: {}", input, output);
+
+    let ref in_img = image::open(&Path::new(input)).unwrap();
+
+    // The dimensions method returns the images width and height
+    println!("dimensions {:?}", in_img.dimensions());
+
+    // The color method returns the image's ColorType
+    println!("{:?}", in_img.color());
+
+    let ref mut out_img = RgbaImage::new(in_img.width(), in_img.height());
+
+    sort_them_pixels(in_img, out_img);
+
+    // Write the contents of this image to the Writer in PNG format.
+    let _ = out_img.save(output).unwrap();
+}
+
+fn sort_them_pixels(input: &DynamicImage, output: &mut RgbaImage){
+    for (x, y, pixel) in input.pixels() {
+        output.put_pixel(x, y, pixel);
+    }
 }
