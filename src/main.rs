@@ -50,8 +50,8 @@ fn handle_request(input: &str, output: &str, chunk_min_length: u32, chunk_max_le
 
     let ref in_img = image::open(&Path::new(input)).unwrap();
 
-    println!("dimensions {:?}", in_img.dimensions());
-    println!("{:?}", in_img.color());
+    println!("dimensions: {:?}", in_img.dimensions());
+    println!("colour: {:?}", in_img.color());
 
     let out_img = brute_sort(in_img, chunk_min_length, chunk_max_length);
 
