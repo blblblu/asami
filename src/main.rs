@@ -6,7 +6,7 @@ extern crate image;
 use std::path::Path;
 use rand::Rng;
 use clap::{Arg, App};
-use image::{DynamicImage, GenericImage, RgbaImage};
+use image::{DynamicImage, GenericImage, Rgba, RgbaImage};
 
 arg_enum!{
     enum Mode {
@@ -71,15 +71,23 @@ fn brute_sort(input: &DynamicImage, chunk_min_length: u32, chunk_max_length: u32
     for (_, _, pixel) in input.pixels() {
         tmp.push(pixel);
         if tmp.len() == threshold as usize {
-            tmp.sort_by(|a, b| (a[2]).cmp(&b[2]));
+            sum_sort(&mut tmp);
             write_pixels_to_image(&mut output, out_x, out_y, &mut tmp);
             increase_coordinates(&mut out_x, &mut out_y, threshold, &output);
             threshold = calculate_chunk_threshold(chunk_min_length, chunk_max_length);
         }
     }
-    tmp.sort_by(|a, b| (a[2]).cmp(&b[2]));
+    sum_sort(&mut tmp);
     write_pixels_to_image(&mut output, out_x, out_y, &mut tmp);
     output
+}
+
+fn sum_sort(pixels: &mut Vec<Rgba<u8>>) {
+    pixels.sort_by(|a, b| (pixel_sum(*a)).cmp(&pixel_sum(*b)));
+}
+
+fn pixel_sum(pixel: Rgba<u8>) -> u32 {
+    (0..3).fold(0, |sum, x| sum + pixel[x] as u32) * pixel[3] as u32
 }
 
 fn calculate_chunk_threshold(chunk_min_length: u32, chunk_max_length: u32) -> u32 {
@@ -91,7 +99,7 @@ fn increase_coordinates(x: &mut u32, y: &mut u32, steps: u32, image: &RgbaImage)
     *x = (*x + steps) % image.width();
 }
 
-fn write_pixels_to_image(image: &mut RgbaImage, x: u32, y: u32, pixels: &mut Vec<image::Rgba<u8>>){
+fn write_pixels_to_image(image: &mut RgbaImage, x: u32, y: u32, pixels: &mut Vec<Rgba<u8>>){
     let mut x = x;
     let mut y = y;
 
