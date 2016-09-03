@@ -70,12 +70,14 @@ fn brute_sort(input: &DynamicImage, chunk_min_length: u32, chunk_max_length: u32
 
     for (_, _, pixel) in input.pixels() {
         tmp.push(pixel);
-        if tmp.len() > threshold as usize {
-            threshold = calculate_chunk_threshold(chunk_min_length, chunk_max_length);
+        if tmp.len() == threshold as usize {
             tmp.sort_by(|a, b| (a[3]).cmp(&b[1]));
-            write_pixel_to_image(&mut output, &mut out_x, &mut out_y, &mut tmp);
+            write_pixels_to_image(&mut output, out_x, out_y, &mut tmp);
+            increase_coordinates(&mut out_x, &mut out_y, threshold, &output);
+            threshold = calculate_chunk_threshold(chunk_min_length, chunk_max_length);
         }
     }
+    write_pixels_to_image(&mut output, out_x, out_y, &mut tmp);
     output
 }
 
@@ -83,10 +85,17 @@ fn calculate_chunk_threshold(chunk_min_length: u32, chunk_max_length: u32) -> u3
     rand::thread_rng().gen_range(chunk_min_length, chunk_max_length + 1)
 }
 
-fn write_pixel_to_image(image: &mut RgbaImage, x: &mut u32, y: &mut u32, pixels: &mut Vec<image::Rgba<u8>>){
+fn increase_coordinates(x: &mut u32, y: &mut u32, steps: u32, image: &RgbaImage) {
+    *y = *y + (*x + steps) / image.width();
+    *x = (*x + steps) % image.width();
+}
+
+fn write_pixels_to_image(image: &mut RgbaImage, x: u32, y: u32, pixels: &mut Vec<image::Rgba<u8>>){
+    let mut x = x;
+    let mut y = y;
+
     while !pixels.is_empty() {
-        image.put_pixel(*x, *y, pixels.pop().unwrap());
-        *y = *y + (*x + 1) / image.width();
-        *x = (*x + 1) % image.width();
+        image.put_pixel(x, y, pixels.pop().unwrap());
+        increase_coordinates(&mut x, &mut y, 1, &image);
     }
 }
