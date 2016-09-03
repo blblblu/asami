@@ -89,20 +89,20 @@ fn handle_request(input: &str, output: &str) {
 }
 
 fn sort_them_pixels(input: &DynamicImage, output: &mut RgbaImage){
-    let mut tmp_x = 0;
-    let mut tmp_y = 0;
+    let mut x = 0;
+    let mut y = 0;
 
     let mut tmp = Vec::new();
 
-    for (x, y, pixel) in input.pixels() {
+    for (_, _, pixel) in input.pixels() {
         tmp.push(pixel);
-        if tmp.len() > 20 {
-            tmp.sort_by(|a, b| a[0].cmp(&b[0]));
+        if tmp.len() > 10 {
+            tmp.sort_by(|a, b| (a[1]).cmp(&b[1]));
             //tmp = Vec::new();
             while !tmp.is_empty() {
-                output.put_pixel(tmp_x, tmp_y, tmp.pop().unwrap());
-                tmp_y = tmp_y + (tmp_x + 1) / input.width();
-                tmp_x = (tmp_x + 1) % input.width();
+                output.put_pixel(x, y, tmp.pop().unwrap());
+                y = y + (x + 1) / input.width();
+                x = (x + 1) % input.width();
             }
         }
     }
