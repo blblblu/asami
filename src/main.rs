@@ -16,7 +16,7 @@ arg_enum!{
 
 fn main() {
     let matches = App::new("asami")
-        .version("0.1.0")
+        .version("0.2.0")
         .author("Sebastian Schulz <mail@sesc.me>")
         .about("pixel sorter")
         .args_from_usage(
