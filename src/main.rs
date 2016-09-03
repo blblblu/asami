@@ -22,29 +22,38 @@ fn main() {
         .args_from_usage(
             "<INPUT> 'The input file to use'
              <OUTPUT> 'The output file to use'")
-        .arg(Arg::from_usage("-m --mode <MODE> 'The mode to use")
+        .arg(Arg::from_usage("-m --mode <MODE> 'The mode to use'")
             .possible_values(&Mode::variants())
             .default_value("Brute"))
+        .arg(Arg::from_usage("--min <MIN> 'The minimum chunk size to sort'")
+            .default_value("32"))
+        .arg(Arg::from_usage("--max <MAX> 'The maximum chunk size to sort'")
+            .default_value("64"))
         .get_matches();
 
     let input = matches.value_of("INPUT").unwrap();
     let output = matches.value_of("OUTPUT").unwrap();
 
-    let mode = matches.value_of("mode").unwrap();
-    println!("{}", mode);
+    let min = value_t!(matches, "min", u32).expect("the minimum chunk size has to be a number");
+    let max = value_t!(matches, "max", u32).expect("the maximum chunk size has to be a number");
 
-    handle_request(input, output);
+    let mode = matches.value_of("mode").unwrap();
+
+    println!("mode: {}", mode);
+
+    handle_request(input, output, min, max);
 }
 
-fn handle_request(input: &str, output: &str) {
+fn handle_request(input: &str, output: &str, chunk_min_length: u32, chunk_max_length: u32) {
     println!("input: {}, output: {}", input, output);
+    println!("minimum chunk size: {}, maximum chunk size: {}", chunk_min_length, chunk_max_length);
 
     let ref in_img = image::open(&Path::new(input)).unwrap();
 
     println!("dimensions {:?}", in_img.dimensions());
     println!("{:?}", in_img.color());
 
-    let out_img = brute_sort(in_img, 32, 64);
+    let out_img = brute_sort(in_img, chunk_min_length, chunk_max_length);
 
     let _ = out_img.save(output).unwrap();
 }
