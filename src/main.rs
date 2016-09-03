@@ -9,7 +9,7 @@ use image::{DynamicImage, GenericImage, RgbaImage};
 
 fn main() {
     let matches = App::new("asami")
-        //.version("1.0")
+        .version("0.1.0")
         .author("Sebastian Schulz <mail@sesc.me>")
         .about("pixel sorter")
         .arg(Arg::with_name("input")
