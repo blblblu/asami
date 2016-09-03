@@ -1,17 +1,16 @@
-// extern crate rand;
+extern crate rand;
 #[macro_use]
 extern crate clap;
 extern crate image;
 
 use std::path::Path;
-// use rand::Rng;
+use rand::Rng;
 use clap::{Arg, App};
 use image::{DynamicImage, GenericImage, RgbaImage};
 
 arg_enum!{
-    //#[derive(Debug)]
     enum Mode {
-        brute
+        Brute
     }
 }
 
@@ -20,34 +19,12 @@ fn main() {
         .version("0.1.0")
         .author("Sebastian Schulz <mail@sesc.me>")
         .about("pixel sorter")
-        /*.arg(Arg::with_name("input")
-            .short("i")
-            .long("input")
-            .value_name("PATH")
-            .help("path to input file")
-            .takes_value(true)
-            .required(true))
-        .arg(Arg::with_name("output")
-            .short("o")
-            .long("output")
-            .value_name("PATH")
-            .help("path to output file")
-            .takes_value(true)
-            .required(true))
-        .arg(Arg::with_name("mode")
-            .short("m")
-            .long("mode")
-            .value_name("MODE")
-            .help("path to input file")
-            .takes_value(true)
-            .possible_values(&Mode::variants())
-            .required(true))*/
         .args_from_usage(
-            "<INPUT> 'Sets the input file to use'
-             <OUTPUT> 'Sets the output file to use'")
-        .arg(Arg::from_usage("-m --mode <MODE> 'Sets the mode to use")
+            "<INPUT> 'The input file to use'
+             <OUTPUT> 'The output file to use'")
+        .arg(Arg::from_usage("-m --mode <MODE> 'The mode to use")
             .possible_values(&Mode::variants())
-            .default_value("brute"))
+            .default_value("Brute"))
         .get_matches();
 
     let input = matches.value_of("INPUT").unwrap();
@@ -67,29 +44,40 @@ fn handle_request(input: &str, output: &str) {
     println!("dimensions {:?}", in_img.dimensions());
     println!("{:?}", in_img.color());
 
-    let out_img = brute_sort(in_img);
+    let out_img = brute_sort(in_img, 32, 64);
 
     let _ = out_img.save(output).unwrap();
 }
 
-fn brute_sort(input: &DynamicImage) -> RgbaImage {
+fn brute_sort(input: &DynamicImage, chunk_min_length: u32, chunk_max_length: u32) -> RgbaImage {
     let mut output = RgbaImage::new(input.width(), input.height());
 
-    let mut x = 0;
-    let mut y = 0;
+    let mut out_x = 0;
+    let mut out_y = 0;
 
     let mut tmp = Vec::new();
 
+    let mut threshold = calculate_chunk_threshold(chunk_min_length, chunk_max_length);
+
     for (_, _, pixel) in input.pixels() {
         tmp.push(pixel);
-        if tmp.len() > 100 {
+        if tmp.len() > threshold as usize {
+            threshold = calculate_chunk_threshold(chunk_min_length, chunk_max_length);
             tmp.sort_by(|a, b| (a[3]).cmp(&b[1]));
-            while !tmp.is_empty() {
-                output.put_pixel(x, y, tmp.pop().unwrap());
-                y = y + (x + 1) / input.width();
-                x = (x + 1) % input.width();
-            }
+            write_pixel_to_image(&mut output, &mut out_x, &mut out_y, &mut tmp);
         }
     }
     output
+}
+
+fn calculate_chunk_threshold(chunk_min_length: u32, chunk_max_length: u32) -> u32 {
+    rand::thread_rng().gen_range(chunk_min_length, chunk_max_length + 1)
+}
+
+fn write_pixel_to_image(image: &mut RgbaImage, x: &mut u32, y: &mut u32, pixels: &mut Vec<image::Rgba<u8>>){
+    while !pixels.is_empty() {
+        image.put_pixel(*x, *y, pixels.pop().unwrap());
+        *y = *y + (*x + 1) / image.width();
+        *x = (*x + 1) % image.width();
+    }
 }
