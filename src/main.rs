@@ -16,7 +16,7 @@ arg_enum!{
 
 fn main() {
     let matches = App::new("asami")
-        .version("0.2.0")
+        .version("0.2.1")
         .author("Sebastian Schulz <mail@sesc.me>")
         .about("pixel sorter")
         .args_from_usage(
@@ -77,6 +77,7 @@ fn brute_sort(input: &DynamicImage, chunk_min_length: u32, chunk_max_length: u32
             threshold = calculate_chunk_threshold(chunk_min_length, chunk_max_length);
         }
     }
+    tmp.sort_by(|a, b| (a[2]).cmp(&b[2]));
     write_pixels_to_image(&mut output, out_x, out_y, &mut tmp);
     output
 }
