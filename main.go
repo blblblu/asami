@@ -3,12 +3,12 @@ package main
 import (
 	"image"
 	"image/draw"
+	_ "image/jpeg"
 	"image/png"
 	"math/rand"
 	"os"
 	"sort"
 	"strings"
-
 	"time"
 
 	"github.com/urfave/cli"
@@ -142,30 +142,7 @@ func sortRGBA(rgba *image.RGBA) {
 	chunks := calculateChunks(rgba.Bounds())
 
 	for _, chunk := range chunks {
-		beginIndex := chunk.begin * 4
-		endIndex := beginIndex + chunk.size*4
-		data := rgba.Pix[beginIndex:endIndex]
-
-		pixels := rgbaPixels{}
-
-		for i := 0; i < len(data); i += 4 {
-			pixel := rgbaPixel{
-				data[i+0],
-				data[i+1],
-				data[i+2],
-				data[i+3],
-			}
-			pixels = append(pixels, pixel)
-		}
-
-		sort.Sort(pixels)
-
-		for i, pixel := range pixels {
-			data[i*4+0] = pixel[0]
-			data[i*4+1] = pixel[1]
-			data[i*4+2] = pixel[2]
-			data[i*4+3] = pixel[3]
-		}
+		chunk.sort(rgba)
 	}
 }
 
@@ -201,9 +178,74 @@ func chunkSize() int {
 type rgbaPixel [4]uint8
 type rgbaPixels []rgbaPixel
 
-func (p rgbaPixels) Len() int           { return len(p) }
-func (p rgbaPixels) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
-func (p rgbaPixels) Less(i, j int) bool { return p[i][0] < p[j][0] }
+type byRed rgbaPixels
+
+func (p byRed) Len() int           { return len(p) }
+func (p byRed) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p byRed) Less(i, j int) bool { return p[i][0] < p[j][0] }
+
+type byGreen rgbaPixels
+
+func (p byGreen) Len() int           { return len(p) }
+func (p byGreen) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p byGreen) Less(i, j int) bool { return p[i][1] < p[j][1] }
+
+type byBlue rgbaPixels
+
+func (p byBlue) Len() int           { return len(p) }
+func (p byBlue) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p byBlue) Less(i, j int) bool { return p[i][2] < p[j][2] }
+
+type bySum rgbaPixels
+
+func (p bySum) Len() int      { return len(p) }
+func (p bySum) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+func (p bySum) Less(i, j int) bool {
+	return p[i].sum() < p[j].sum()
+}
+
+func (p *rgbaPixel) sum() uint32 {
+	return uint32(p[0]) + uint32(p[1]) + uint32(p[2])
+}
+
+type byGrayscale rgbaPixels
+
+func (p byGrayscale) Len() int      { return len(p) }
+func (p byGrayscale) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+func (p byGrayscale) Less(i, j int) bool {
+	return p[i].gray() < p[j].gray()
+}
+
+func (p *rgbaPixel) gray() uint8 {
+	return p[0]>>2 + p[1]>>1 + p[1]>>3 + p[2]>>3
+}
+
+func (chunk *chunk) sort(rgba *image.RGBA) {
+	beginIndex := chunk.begin * 4
+	endIndex := beginIndex + chunk.size*4
+	data := rgba.Pix[beginIndex:endIndex]
+
+	pixels := rgbaPixels{}
+
+	for i := 0; i < len(data); i += 4 {
+		pixel := rgbaPixel{
+			data[i+0],
+			data[i+1],
+			data[i+2],
+			data[i+3],
+		}
+		pixels = append(pixels, pixel)
+	}
+
+	sort.Sort(byBlue(pixels))
+
+	for i, pixel := range pixels {
+		data[i*4+0] = pixel[0]
+		data[i*4+1] = pixel[1]
+		data[i*4+2] = pixel[2]
+		data[i*4+3] = pixel[3]
+	}
+}
 
 func main() {
 	app.Run(os.Args)
