@@ -3,6 +3,7 @@ package files
 import (
 	"image"
 	"image/draw"
+	_ "image/jpeg" // to be able to import jpeg images
 	"image/png"
 	"os"
 )
