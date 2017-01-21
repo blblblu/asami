@@ -4,8 +4,12 @@ import (
 	"image"
 	"image/draw"
 	"image/png"
+	"math/rand"
 	"os"
+	"sort"
 	"strings"
+
+	"time"
 
 	"github.com/urfave/cli"
 )
@@ -84,14 +88,14 @@ func checkInput(c *cli.Context) error {
 		return cli.Exit(errorMessage, 1)
 	}
 
-	image, err := loadImage(args.input)
+	rgba, err := loadImage(args.input)
 	if err != nil {
 		return err
 	}
 
-	sort(image)
+	sortRGBA(rgba)
 
-	err = saveImage(args.output, image)
+	err = saveImage(args.output, rgba)
 	if err != nil {
 		return err
 	}
@@ -117,21 +121,89 @@ func loadImage(filename string) (*image.RGBA, error) {
 	return rgba, nil
 }
 
-func saveImage(filename string, image *image.RGBA) error {
+func saveImage(filename string, rgba *image.RGBA) error {
 	outFile, err := os.Create(filename)
 	if err != nil {
 		return cli.Exit("failed writing output image to file", 4)
 	}
 	defer outFile.Close()
 
-	png.Encode(outFile, image)
+	png.Encode(outFile, rgba)
 
 	return nil
 }
 
-func sort(img *image.RGBA) {
-
+type chunk struct {
+	begin int
+	size  int
 }
+
+func sortRGBA(rgba *image.RGBA) {
+	chunks := calculateChunks(rgba.Bounds())
+
+	for _, chunk := range chunks {
+		beginIndex := chunk.begin * 4
+		endIndex := beginIndex + chunk.size*4
+		data := rgba.Pix[beginIndex:endIndex]
+
+		pixels := rgbaPixels{}
+
+		for i := 0; i < len(data); i += 4 {
+			pixel := rgbaPixel{
+				data[i+0],
+				data[i+1],
+				data[i+2],
+				data[i+3],
+			}
+			pixels = append(pixels, pixel)
+		}
+
+		sort.Sort(pixels)
+
+		for i, pixel := range pixels {
+			data[i*4+0] = pixel[0]
+			data[i*4+1] = pixel[1]
+			data[i*4+2] = pixel[2]
+			data[i*4+3] = pixel[3]
+		}
+	}
+}
+
+func calculateChunks(bounds image.Rectangle) []chunk {
+	chunks := []chunk{}
+
+	size := bounds.Max.Sub(bounds.Min)
+	width := size.X
+	height := size.Y
+
+	rand.Seed(time.Now().UnixNano())
+
+	for y := 0; y < height; y++ {
+		x := 0
+		for x < width {
+			size := chunkSize()
+			if size > width-x {
+				size = width - x
+			}
+			begin := y*width + x
+			chunks = append(chunks, chunk{begin, size})
+			x += size
+		}
+	}
+
+	return chunks
+}
+
+func chunkSize() int {
+	return rand.Intn(args.max-args.min) + args.min
+}
+
+type rgbaPixel [4]uint8
+type rgbaPixels []rgbaPixel
+
+func (p rgbaPixels) Len() int           { return len(p) }
+func (p rgbaPixels) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p rgbaPixels) Less(i, j int) bool { return p[i][0] < p[j][0] }
 
 func main() {
 	app.Run(os.Args)
