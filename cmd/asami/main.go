@@ -3,7 +3,7 @@ package main
 import (
 	"image"
 	"image/draw"
-	_ "image/jpeg"
+	_ "image/jpeg" // to be able to import jpeg images
 	"image/png"
 	"math/rand"
 	"os"
@@ -63,6 +63,18 @@ func init() {
 				return err
 			}
 
+			rgba, err := loadImage(args.input)
+			if err != nil {
+				return err
+			}
+
+			sortRGBA(rgba)
+
+			err = saveImage(args.output, rgba)
+			if err != nil {
+				return err
+			}
+
 			return nil
 		},
 	}
@@ -86,18 +98,6 @@ func checkInput(c *cli.Context) error {
 	if len(errors) > 0 {
 		errorMessage := strings.Join(errors, "\n")
 		return cli.Exit(errorMessage, 1)
-	}
-
-	rgba, err := loadImage(args.input)
-	if err != nil {
-		return err
-	}
-
-	sortRGBA(rgba)
-
-	err = saveImage(args.output, rgba)
-	if err != nil {
-		return err
 	}
 
 	return nil
