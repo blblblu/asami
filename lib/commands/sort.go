@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/blblblu/asami/lib/files"
@@ -9,14 +10,16 @@ import (
 	"github.com/urfave/cli"
 )
 
-type SortingArgs struct {
+type sortingArgs struct {
 	input  string
 	output string
 	min    int
 	max    int
 }
 
-func NewSortCommand(args *SortingArgs) *cli.Command {
+func NewSortCommand() *cli.Command {
+	args := sortingArgs{}
+
 	return &cli.Command{
 		Name:  "sort",
 		Usage: "simple brute sorting",
@@ -46,9 +49,11 @@ func NewSortCommand(args *SortingArgs) *cli.Command {
 				Destination: &args.max,
 			},
 		},
-		Action: func(c *cli.Context) error {
-			if err := checkInput(c, args); err != nil {
-				return err
+		Action: func(ctx *cli.Context) error {
+			if err := checkSortingArgs(ctx, &args); err != nil {
+				fmt.Fprintf(os.Stderr, "%s\n\n", err)
+				cli.ShowCommandHelp(ctx, "sort")
+				return cli.Exit("", 1)
 			}
 
 			rgba, err := files.LoadImage(args.input)
@@ -68,7 +73,7 @@ func NewSortCommand(args *SortingArgs) *cli.Command {
 	}
 }
 
-func checkInput(c *cli.Context, args *SortingArgs) error {
+func checkSortingArgs(ctx *cli.Context, args *sortingArgs) error {
 	errors := []string{}
 	if args.input == "" {
 		errors = append(errors, "input file path must be set")
@@ -85,7 +90,7 @@ func checkInput(c *cli.Context, args *SortingArgs) error {
 
 	if len(errors) > 0 {
 		errorMessage := strings.Join(errors, "\n")
-		return cli.Exit(errorMessage, 1)
+		return fmt.Errorf(errorMessage)
 	}
 
 	return nil

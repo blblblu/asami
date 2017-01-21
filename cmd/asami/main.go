@@ -1,29 +1,32 @@
 package main
 
 import (
+	"math/rand"
 	"os"
+	"time"
 
 	"github.com/blblblu/asami/lib/commands"
 	"github.com/urfave/cli"
 )
 
 var (
-	version     = "master"
-	app         *cli.App
-	sortingArgs commands.SortingArgs
+	version = "master"
+	app     *cli.App
 )
 
 func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+func main() {
 	app = &cli.App{
 		Name:    "asami",
 		Usage:   "simple image corruptor",
 		Version: version,
 		Commands: []*cli.Command{
-			commands.NewSortCommand(&sortingArgs),
+			commands.NewSortCommand(),
 		},
 	}
-}
 
-func main() {
 	app.Run(os.Args)
 }
