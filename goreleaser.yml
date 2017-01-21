@@ -1,0 +1,23 @@
+build:
+  main: ./main.go
+
+  binary_name: asami
+
+  ldflags: -s -w
+
+  goos:
+    - linux
+    - darwin
+    - freebsd
+    - windows
+
+  goarch:
+    - amd64
+
+archive:
+  name_template: "{{.BinaryName}}_{{.Version}}_{{.Os}}_{{.Arch}}"
+
+  format: zip
+
+release:
+  repo: blblblu/asami
