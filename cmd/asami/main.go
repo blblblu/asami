@@ -11,7 +11,6 @@ import (
 
 var (
 	version = "master"
-	app     *cli.App
 )
 
 func init() {
@@ -19,7 +18,7 @@ func init() {
 }
 
 func main() {
-	app = &cli.App{
+	app := cli.App{
 		Name:    "asami",
 		Usage:   "simple image corruptor",
 		Version: version,
