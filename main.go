@@ -1,82 +1,138 @@
 package main
 
 import (
+	"image"
+	"image/draw"
+	"image/png"
 	"os"
+	"strings"
 
 	"github.com/urfave/cli"
 )
 
-var version = "master"
+var (
+	version = "master"
+	app     *cli.App
+	args    arguments
+)
 
-/*type Pixels [][]uint8
-
-func (p Pixels) Len() int { return len(p) }
-func (p Pixels) Swap(i, j int) {
-	//p[i], p[j] = p[j], p[i]
-	for k := 0; k < 2; k++ {
-		p[i][k], p[j][k] = p[j][k], p[i][k]
-	}
+type arguments struct {
+	input  string
+	output string
+	min    int
+	max    int
 }
-func (p Pixels) Less(i, j int) bool {
-	sumI := 0
-	sumJ := 0
-	for x := 0; x < 4; x++ {
-		sumI += int(p[i][x])
-		sumJ += int(p[j][x])
-	}
-	return sumI < sumJ
-}
-func handleRequest(input string, output string) error {
-	inputImage, _ := imaging.Open(input)
-	x := inputImage.Bounds().Dx()
-	y := inputImage.Bounds().Dy()
-	outputImage := imaging.New(x, y, color.NRGBA{0, 0, 0, 0})
-	//outputImage = imaging.PasteCenter(outputImage, inputImage)
-	src := inputImage.(*image.NRGBA)
-	dst := outputImage
-	const chunkSize = 200
-	count := x * y * 4
-	for i := 0; i < count/(chunkSize+1); i++ {
-		pixels := make([][]uint8, chunkSize)
-		for j := range pixels {
-			pixels[j] = src.Pix[i*chunkSize+j*4 : i*chunkSize+j*4+4]
-		}
-		sort.Sort(Pixels(pixels))
-		for j := range pixels {
-			dst.Pix[i*chunkSize+j*4] = pixels[j][0]
-			dst.Pix[i*chunkSize+j*4+1] = pixels[j][1]
-			dst.Pix[i*chunkSize+j*4+2] = pixels[j][2]
-			dst.Pix[i*chunkSize+j*4+3] = pixels[j][3]
-		}
-		//dst.Pix[i*chunkSize+j] = src.Pix[i*chunkSize+j]
-	}
-	if err := imaging.Save(outputImage, output); err != nil {
-		return err
-	}
-	return nil
-}*/
 
-func main() {
-	app := &cli.App{
+func init() {
+	app = &cli.App{
 		Name:    "asami",
-		Usage:   "simple pixel sorter",
+		Usage:   "pixel sorter using simple brute sorting",
 		Version: version,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:    "input",
-				Usage:   "the input file `path` to use",
-				Aliases: []string{"i"},
+				Name:        "input",
+				Usage:       "the input file `path` to use",
+				Aliases:     []string{"i"},
+				Destination: &args.input,
 			},
 			&cli.StringFlag{
-				Name:    "output",
-				Usage:   "the output file `path` to use",
-				Aliases: []string{"o"},
+				Name:        "output",
+				Usage:       "the output file `path` to use, must be a png file",
+				Aliases:     []string{"o"},
+				Destination: &args.output,
+			},
+			&cli.IntFlag{
+				Name:        "min",
+				Usage:       "the minimum chunk `size`",
+				Value:       32,
+				Destination: &args.min,
+			},
+			&cli.IntFlag{
+				Name:        "max",
+				Usage:       "the maximum chunk `size`",
+				Value:       64,
+				Destination: &args.max,
 			},
 		},
 		Action: func(c *cli.Context) error {
+			if err := checkInput(c); err != nil {
+				return err
+			}
+
 			return nil
 		},
 	}
+}
 
+func checkInput(c *cli.Context) error {
+	errors := []string{}
+	if args.input == "" {
+		errors = append(errors, "input file path must be set")
+	}
+	if args.output == "" {
+		errors = append(errors, "output file path must be set")
+	}
+	if args.min < 1 {
+		errors = append(errors, "minimum chunk size must be at least 1")
+	}
+	if args.max < args.min {
+		errors = append(errors, "maximum chunk size must be at least as big as the minimum chunk size")
+	}
+
+	if len(errors) > 0 {
+		errorMessage := strings.Join(errors, "\n")
+		return cli.Exit(errorMessage, 1)
+	}
+
+	image, err := loadImage(args.input)
+	if err != nil {
+		return err
+	}
+
+	sort(image)
+
+	err = saveImage(args.output, image)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func loadImage(filename string) (*image.RGBA, error) {
+	inFile, err := os.Open(filename)
+	if err != nil {
+		return nil, cli.Exit("failed reading input file", 2)
+	}
+	defer inFile.Close()
+
+	img, _, err := image.Decode(inFile)
+	if err != nil {
+		return nil, cli.Exit("failed decoding input file", 3)
+	}
+
+	rgba := image.NewRGBA(img.Bounds())
+	draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)
+
+	return rgba, nil
+}
+
+func saveImage(filename string, image *image.RGBA) error {
+	outFile, err := os.Create(filename)
+	if err != nil {
+		return cli.Exit("failed writing output image to file", 4)
+	}
+	defer outFile.Close()
+
+	png.Encode(outFile, image)
+
+	return nil
+}
+
+func sort(img *image.RGBA) {
+
+}
+
+func main() {
 	app.Run(os.Args)
 }
