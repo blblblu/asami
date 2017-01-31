@@ -19,8 +19,11 @@ func init() {
 
 func main() {
 	app := cli.App{
-		Name:    "asami",
-		Usage:   "simple image corruptor",
+		Name:  "asami",
+		Usage: "simple image corruptor",
+		Authors: []*cli.Author{
+			{Name: "Sebastian Schulz", Email: "mail@sesc.me"},
+		},
 		Version: version,
 		Commands: []*cli.Command{
 			commands.NewSortCommand(),
