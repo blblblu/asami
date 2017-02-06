@@ -32,9 +32,8 @@ func SortImage(img image.Image, min, max int, inverted bool) image.Image {
 
 	if !inverted {
 		return rgba
-	} else {
-		return imaging.Invert(rgba)
 	}
+	return imaging.Invert(rgba)
 }
 
 func calculateChunks(bounds image.Rectangle, min, max int) []chunk {
