@@ -4,5 +4,9 @@
 
 package sorting
 
-func (p byGrayscale) Len() int      { return len(p) }
-func (p byGrayscale) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+func (p byGrayscale) Len() int { return len(p) / 4 }
+func (p byGrayscale) Swap(i, j int) {
+	for k := 0; k < 4; k++ {
+		p[i*4+k], p[j*4+k] = p[j*4+k], p[i*4+k]
+	}
+}

@@ -20,32 +20,12 @@ func chunkSize(min, max int) int {
 	return rand.Intn(max-min) + min
 }
 
-type rgbaPixel [4]uint8
-type rgbaPixels []rgbaPixel
+type rgbaPixels []uint8
 
 func (chunk *chunk) sort(rgba *image.RGBA) {
 	beginIndex := chunk.begin * 4
 	endIndex := beginIndex + chunk.size*4
 	data := rgba.Pix[beginIndex:endIndex]
 
-	pixels := rgbaPixels{}
-
-	for i := 0; i < len(data); i += 4 {
-		pixel := rgbaPixel{
-			data[i+0],
-			data[i+1],
-			data[i+2],
-			data[i+3],
-		}
-		pixels = append(pixels, pixel)
-	}
-
-	sort.Sort(byGreen(pixels))
-
-	for i, pixel := range pixels {
-		data[i*4+0] = pixel[0]
-		data[i*4+1] = pixel[1]
-		data[i*4+2] = pixel[2]
-		data[i*4+3] = pixel[3]
-	}
+	sort.Sort(byGrayscale(data))
 }

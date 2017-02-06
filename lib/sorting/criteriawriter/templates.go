@@ -9,8 +9,12 @@ var templates = typewriter.TemplateSlice{
 var set = &typewriter.Template{
 	Name: "Criteria",
 	Text: `
-  func (p {{.Name}}) Len() int      { return len(p) }
-  func (p {{.Name}}) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+  func (p {{.Name}}) Len() int      { return len(p) / 4 }
+  func (p {{.Name}}) Swap(i, j int) {
+	for k := 0; k < 4; k++ {
+		p[i*4+k], p[j*4+k] = p[j*4+k], p[i*4+k]
+	}
+}
   `,
 	TypeConstraint: typewriter.Constraint{Comparable: false},
 }
