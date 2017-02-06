@@ -11,10 +11,11 @@ import (
 )
 
 var sortingArgs struct {
-	input  string
-	output string
-	min    int
-	max    int
+	input    string
+	output   string
+	min      int
+	max      int
+	inverted bool
 }
 
 var sortCmd = &cobra.Command{
@@ -36,7 +37,7 @@ var sortCmd = &cobra.Command{
 			return
 		}
 
-		sorted := sorting.SortImage(img, sortingArgs.min, sortingArgs.max)
+		sorted := sorting.SortImage(img, sortingArgs.min, sortingArgs.max, sortingArgs.inverted)
 
 		err = files.SaveImage(sortingArgs.output, sorted)
 		if err != nil {
@@ -77,4 +78,5 @@ func init() {
 	sortCmd.Flags().StringVarP(&sortingArgs.output, "output", "o", "", "the output file path to use, must be a png file")
 	sortCmd.Flags().IntVar(&sortingArgs.min, "min", 32, "the minimum chunk size to use")
 	sortCmd.Flags().IntVar(&sortingArgs.max, "max", 64, "the maximum chunk size to use")
+	sortCmd.Flags().BoolVar(&sortingArgs.inverted, "inverted", false, "inverts the sorting direction")
 }

@@ -5,6 +5,8 @@ import (
 	"image/draw"
 	"math/rand"
 	"time"
+
+	"github.com/disintegration/imaging"
 )
 
 func init() {
@@ -12,9 +14,15 @@ func init() {
 
 }
 
-func SortImage(img image.Image, min, max int) image.Image {
+func SortImage(img image.Image, min, max int, inverted bool) image.Image {
 	rgba := image.NewRGBA(img.Bounds())
-	draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)
+
+	if !inverted {
+		draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)
+	} else {
+		invertedImg := imaging.Invert(img)
+		draw.Draw(rgba, rgba.Bounds(), invertedImg, image.Point{0, 0}, draw.Src)
+	}
 
 	chunks := calculateChunks(rgba.Bounds(), min, max)
 
@@ -22,7 +30,11 @@ func SortImage(img image.Image, min, max int) image.Image {
 		chunk.sort(rgba)
 	}
 
-	return rgba
+	if !inverted {
+		return rgba
+	} else {
+		return imaging.Invert(rgba)
+	}
 }
 
 func calculateChunks(bounds image.Rectangle, min, max int) []chunk {
