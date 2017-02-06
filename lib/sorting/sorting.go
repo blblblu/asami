@@ -1,6 +1,15 @@
 package sorting
 
-import "image"
+import (
+	"image"
+	"math/rand"
+	"time"
+)
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+
+}
 
 func SortRGBA(rgba *image.RGBA, min, max int) {
 	chunks := calculateChunks(rgba.Bounds(), min, max)

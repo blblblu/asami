@@ -1,5 +1,5 @@
 build:
-  main: ./cmd/asami/main.go
+  main: ./main.go
 
   binary_name: asami
 
