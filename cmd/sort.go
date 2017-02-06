@@ -25,12 +25,14 @@ var sortCmd = &cobra.Command{
 		if err := checkSortingArgs(); err != nil {
 			fmt.Fprintf(os.Stderr, "%s\n\n", err)
 			cmd.Help()
+			os.Exit(1)
 			return
 		}
 
 		rgba, err := files.LoadImage(sortingArgs.input)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "failed reading input file: %s", err)
+			os.Exit(2)
 			return
 		}
 
@@ -39,6 +41,7 @@ var sortCmd = &cobra.Command{
 		err = files.SaveImage(sortingArgs.output, rgba)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "failed writing output image to file: %s", err)
+			os.Exit(3)
 			return
 		}
 	},
