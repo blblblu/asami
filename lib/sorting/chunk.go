@@ -40,7 +40,7 @@ func (chunk *chunk) sort(rgba *image.RGBA) {
 		pixels = append(pixels, pixel)
 	}
 
-	sort.Sort(byGrayscale(pixels))
+	sort.Sort(byGreen(pixels))
 
 	for i, pixel := range pixels {
 		data[i*4+0] = pixel[0]
