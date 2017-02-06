@@ -2,13 +2,12 @@ package files
 
 import (
 	"image"
-	"image/draw"
 	_ "image/jpeg" // to be able to import jpeg images
 	"image/png"
 	"os"
 )
 
-func LoadImage(filename string) (*image.RGBA, error) {
+func LoadImage(filename string) (image.Image, error) {
 	inFile, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -20,20 +19,17 @@ func LoadImage(filename string) (*image.RGBA, error) {
 		return nil, err
 	}
 
-	rgba := image.NewRGBA(img.Bounds())
-	draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)
-
-	return rgba, nil
+	return img, nil
 }
 
-func SaveImage(filename string, rgba *image.RGBA) error {
+func SaveImage(filename string, img image.Image) error {
 	outFile, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
 	defer outFile.Close()
 
-	png.Encode(outFile, rgba)
+	png.Encode(outFile, img)
 
 	return nil
 }

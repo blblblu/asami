@@ -29,16 +29,16 @@ var sortCmd = &cobra.Command{
 			return
 		}
 
-		rgba, err := files.LoadImage(sortingArgs.input)
+		img, err := files.LoadImage(sortingArgs.input)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "failed reading input file: %s", err)
 			os.Exit(2)
 			return
 		}
 
-		sorting.SortRGBA(rgba, sortingArgs.min, sortingArgs.max)
+		sorted := sorting.SortImage(img, sortingArgs.min, sortingArgs.max)
 
-		err = files.SaveImage(sortingArgs.output, rgba)
+		err = files.SaveImage(sortingArgs.output, sorted)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "failed writing output image to file: %s", err)
 			os.Exit(3)
