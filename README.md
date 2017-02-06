@@ -6,6 +6,6 @@ pixel sorter using simple brute sorting
 
 ## installation
 
-`go get -u github.com/blblblu/asami/cmd/asami`
+`go get -u github.com/blblblu/asami`
 
 ## TODO: fill readme
